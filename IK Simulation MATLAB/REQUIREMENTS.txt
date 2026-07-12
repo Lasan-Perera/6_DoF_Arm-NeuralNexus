@@ -1,0 +1,17 @@
+IK Simulation — Requirements
+============================
+
+MATLAB Release:
+  R2024a   (or your actual version — check with `version` in the Command Window)
+
+Required Toolboxes:
+  - Robotics System Toolbox
+  - Symbolic Math Toolbox        (if you derived the IK equations symbolically)
+  - (add/remove based on what your scripts actually call)
+
+To check which toolboxes a script uses, run in MATLAB:
+  matlab.codetools.requiredFilesAndProducts('yourMainScript.m')
+
+How to run:
+  1. Open MATLAB and cd into "IK Simulation MATLAB"
+  2. Run <yourMainScript>.m

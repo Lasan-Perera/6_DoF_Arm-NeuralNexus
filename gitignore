@@ -1,0 +1,31 @@
+# ---- MATLAB ----
+# Autosave / backup files
+*.asv
+*.m~
+*.autosave
+
+# Compiled MEX files (platform-specific, regenerate on each machine)
+*.mex*
+
+# Simulink build artifacts
+slprj/
+sccprj/
+*.slxc
+*.slx.autosave
+*.slx.original
+
+# Code generation output
+codegen/
+
+# MAT data / results — uncomment if these are large or regenerated
+# *.mat
+
+# Simulation cache & temp
+*.tmp
+octave-workspace
+
+# ---- OS / editor junk ----
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
