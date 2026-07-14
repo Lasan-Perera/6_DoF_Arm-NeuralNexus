@@ -1,0 +1,122 @@
+==============================================================================
+ NeuralNexusArm - MATLAB / Simulink Command Guide
+==============================================================================
+ Quick reference for running the 6-DOF arm: IK, the interactive tool,
+ XYZ commands, hardware link, and the two demos.
+ Keep this next to your MATLAB session.
+==============================================================================
+
+------------------------------------------------------------------------------
+ 0. ONE-TIME SETUP EACH SESSION  (run these first, in order)
+------------------------------------------------------------------------------
+% Load & build the robot model from the Simscape import
+load_system('Assem1')
+robot = importrobot('Assem1');
+robot.DataFormat = 'row';
+
+% Apply joint limits (J3 & J5 are on the 180-deg band)
+limitsDeg = [ -180 180;   % J1
+              -70   70;   % J2
+              120  240;   % J3  (180 +/- 60)
+              -180 180;   % J4
+               60  300;   % J5  (180 +/- 120)
+              -180 180 ]; % J6
+for i = 1:6
+    robot.Bodies{i}.Joint.PositionLimits = deg2rad(limitsDeg(i,:));
+end
+
+% Build the IK solver and the home reference
+ik      = inverseKinematics('RigidBodyTree', robot);
+weights = [1 1 1 1 1 1];
+q0      = homeConfiguration(robot);
+Thome   = getTransform(robot, q0, 'Body6');
+
+% (Hardware only) open the serial link to the STM32
+s = serialport("COM9", 115200);      % clear s;  to release it later
+
+------------------------------------------------------------------------------
+ 1. FIND WHERE THE TIP IS NOW
+------------------------------------------------------------------------------
+Thome = getTransform(robot, q0, 'Body6');
+tipHome = Thome(1:3,4)'               % [x y z] in METERS
+
+------------------------------------------------------------------------------
+ 2. SOLVE IK FOR A TARGET POINT  (simulation only)
+------------------------------------------------------------------------------
+myTarget = [-0.25 0.30 0.05];         % desired tip position [x y z], METERS
+target = trvec2tform(myTarget);
+target(1:3,1:3) = Thome(1:3,1:3);     % keep home orientation
+[qSol, info] = ik('Body6', target, weights, q0);
+info.Status                           % 'success' = reachable
+rad2deg(qSol)                         % the six joint angles (deg)
+show(robot, qSol);                    % preview skeleton
+
+------------------------------------------------------------------------------
+ 3. INTERACTIVE SLIDER TOOL  (drag X/Y/Z, live IK, Play button)
+------------------------------------------------------------------------------
+armIK(robot, ik, weights, q0)         % opens the control window
+
+------------------------------------------------------------------------------
+ 4. SEND AN XYZ TO THE REAL ARM  (+ synced simulation)
+------------------------------------------------------------------------------
+% Requires: serial 's' open, firmware running, arm has clear space.
+% goToXYZ solves IK, sends angles over USB, and loads jointData for Simulink.
+goToXYZ(robot, ik, weights, q0, [-0.15 0.30 0.10], s)
+% then press RUN in Simulink (StopTime = 5) to play the synced 3D twin.
+
+% NOTE: firmware is in RELATIVE mode - each command is a delta from the
+% arm's current pose. Keep targets modest until encoders are added.
+
+------------------------------------------------------------------------------
+ 5. DEMOS  (simulation, for showing off)
+------------------------------------------------------------------------------
+% Both write 'jointData'. Run ONE function, then Run the sim and let it
+% finish, THEN run the other. Blocks must read jointData columns 2-7.
+
+% DEMO 1 - POSITION LOCK (tip point held, tool orientation sweeps, links flow)
+demoPositionLock(robot, ik, q0)
+%   -> Simulink StopTime = 12, then Run.
+
+% DEMO 2 - ORIENTATION LOCK + X/Y/Z SWEEP (tool angle held, tip sweeps each axis)
+demoOrientationLock_XYZsweep(robot, ik, q0)
+%   -> Simulink StopTime = 15, then Run.
+
+------------------------------------------------------------------------------
+ 6. DRIVE THE SOLID ARM IN MECHANICS EXPLORER MANUALLY
+------------------------------------------------------------------------------
+% After any function that builds 'jointData':
+set_param('Assem1','StopTime','12')
+set_param('Assem1','SimulationCommand','start')
+pause(1)
+get_param('Assem1','SimulationStatus')      % 'running' or 'stopped'
+
+------------------------------------------------------------------------------
+ 7. HARDWARE - RAW SERIAL COMMANDS (bypass IK, send angles directly)
+------------------------------------------------------------------------------
+% Six comma-separated joint angles in degrees; firmware converts to steps.
+writeline(s, "10,0,0,0,0,0")          % nudge J1
+writeline(s, "0,10,0,0,0,0")          % nudge J2   ... etc
+pause(0.1); readline(s)               % read the "steps: ..." echo back
+
+------------------------------------------------------------------------------
+ 8. SIMULINK FROM WORKSPACE BLOCK MAP  (set each block's Data field)
+------------------------------------------------------------------------------
+   Revolute1  (J1)  ->  [jointData(:,1), jointData(:,2)]
+   Revolute   (J2)  ->  [jointData(:,1), jointData(:,3)]
+   Revolute2  (J3)  ->  [jointData(:,1), jointData(:,4)]
+   Revolute3  (J4)  ->  [jointData(:,1), jointData(:,5)]
+   Revolute4  (J5)  ->  [jointData(:,1), jointData(:,6)]
+   Revolute5  (J6)  ->  [jointData(:,1), jointData(:,7)]
+
+------------------------------------------------------------------------------
+ QUICK TROUBLESHOOTING
+------------------------------------------------------------------------------
+- Sim "runs" but nothing moves:
+    * StopTime too short -> set it to match the demo (5 / 12 / 15).
+    * Target too close to home -> the glide is tiny; pick a farther point.
+    * Blocks not reading jointData -> re-check the block map in section 8.
+- Only one joint moves in sim -> a block still points at old test data.
+- writeline error about 's' -> the serial port got overwritten; re-open:
+    clear s;  s = serialport("COM9", 115200);
+- Arm won't move on serial -> check firmware flashed & COM9 in Device Manager.
+==============================================================================
