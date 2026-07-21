@@ -1,4 +1,4 @@
-function goToXYZ(robot, ik, weights, q0, xyz)
+function anglesDeg = goToXYZ(robot, ik, weights, q0, xyz, s)
     % Solve IK for the target point
     Rhome = getTransform(robot, q0, 'Body6');
     T = trvec2tform(xyz);
@@ -14,8 +14,8 @@ function goToXYZ(robot, ik, weights, q0, xyz)
     t = linspace(0,5,steps)';
     qTraj = zeros(steps,6);
     for k = 1:steps
-        s = (k-1)/(steps-1);
-        blend = 10*s^3 - 15*s^4 + 6*s^5;
+        sBlend = (k-1)/(steps-1);
+        blend = 10*sBlend^3 - 15*sBlend^4 + 6*sBlend^5;
         qTraj(k,:) = q0 + (qB - q0)*blend;
     end
     jointData = [t, qTraj];
@@ -25,4 +25,10 @@ function goToXYZ(robot, ik, weights, q0, xyz)
 
     fprintf('Ready. Target [%.3f %.3f %.3f] -> press RUN in Simulink.\n', xyz);
     fprintf('Status: %s\n', info.Status);
+    anglesDeg = rad2deg(qB);
+    fprintf('Angles: %.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n', anglesDeg);
+
+    % Send to the arm over serial (relative mode: this is a delta from current pose)
+    msg = sprintf('%.2f,%.2f,%.2f,%.2f,%.2f,%.2f', anglesDeg);
+    writeline(s, msg);
 end
