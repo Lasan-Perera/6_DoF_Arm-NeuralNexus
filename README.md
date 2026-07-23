@@ -538,9 +538,9 @@ A standalone **Web Serial** control panel that talks to the arm directly — **n
 
 ```
 ┌──────────────────────────────────────────────┐
-│  🔌 Connect arm        ● Connected     ■ Stop │
+│ 🔌 Connect arm      ● Connected       ■ Stop │
 ├──────────────────────────────────────────────┤
-│  RECORDED SEQUENCES                Delay [4]s │
+│  RECORDED SEQUENCES               Delay [4]s │
 │  ┌──────────┬──────────┬───────────────────┐ │
 │  │ Show off │   Pick   │ Place from pole   │ │
 │  ├──────────┼──────────┴───────────────────┤ │
@@ -822,9 +822,17 @@ Because the pose is fixed and every target lies on one plane (the table surface)
 ---
 </div>
 
-## Author
-
-**Lasan Perera** — [@Lasan-Perera](https://github.com/Lasan-Perera)
+## 👥 Team
+ 
+| Index No. | Name | GitHub |
+|:----------|:-----|:-------|
+| **230487D** | Lasan Perera | [@Lasan-Perera](https://github.com/Lasan-Perera) |
+| **230502X** | Deneth Priyadarshana | — |
+| **230492M** | Dulana Pitiwaduge | — |
+| **230051L** | Isitha Dinujaya | — |
+| **230108U** | Mokshan Colombage | — |
+ 
+---
 
 <!-- ## License -->
 <!-- Add a license here (e.g. MIT) if you want others to reuse the code. -->
