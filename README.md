@@ -125,7 +125,153 @@ Then follow the setup for whichever subsystem you're working on (simulation, fir
 - [ ] Full closed-loop pick-and-place
 - [ ] Coordinated multi-axis motion planning
 
-<!-- Adjust to match your real status -->
+# 👁️ Computer Vision & Object Detection
+
+![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white)
+![YOLO](https://img.shields.io/badge/YOLO-00FFFF?style=for-the-badge&logo=yolo&logoColor=black)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![NumPy](https://img.shields.io/badge/NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white)
+
+![Status](https://img.shields.io/badge/status-operational-brightgreen)
+![Reprojection Error](https://img.shields.io/badge/reprojection%20error-0.6863%20px-blue)
+![Camera Height](https://img.shields.io/badge/camera%20height-41%20cm-orange)
+![Calibration](https://img.shields.io/badge/calibration-chessboard%20%2B%20homography-purple)
+
+> **The eyes of the NeuralNexusArm.** This subsystem turns raw camera pixels into real-world `(X, Y)` coordinates that feed straight into the inverse kinematics solver — closing the loop between *seeing* and *reaching*.
+
+---
+
+## 🔁 Pipeline Overview
+
+```mermaid
+flowchart LR
+    A([📷 Camera Feed]) --> B[🧹 Undistort<br/>Camera + Distortion Matrix]
+    B --> C{🎯 Detection Mode}
+    C -->|Primary| D[🎨 OpenCV<br/>Colour Segmentation]
+    C -->|Fallback| E[🧠 Trained Models<br/>YOLO / Custom]
+    D --> F[📍 Object Centroid<br/>in pixels]
+    E --> F
+    F --> G[🗺️ Homography<br/>Pixel → World mm]
+    G --> H([🦾 IK Solver → Arm Motion])
+
+    style A fill:#1f77b4,stroke:#fff,color:#fff
+    style D fill:#2ca02c,stroke:#fff,color:#fff
+    style E fill:#9467bd,stroke:#fff,color:#fff
+    style G fill:#ff7f0e,stroke:#fff,color:#fff
+    style H fill:#d62728,stroke:#fff,color:#fff
+```
+
+---
+
+## 🎨 Object Detection
+
+### 🥇 Primary — OpenCV Colour Identification
+
+The main detection path uses **classical colour segmentation** (HSV thresholding → contour extraction → centroid).
+
+Why classical over learned, as the default?
+
+| ⚡ Latency | 🎯 Determinism | 💻 Compute | 🔧 Tunability |
+|:---:|:---:|:---:|:---:|
+| Millisecond-scale | Same input → same output, every time | Runs comfortably on CPU | Live HSV slider tuning |
+
+### 🧠 Secondary — Trained Detectors
+
+For objects that colour alone cannot separate, the repository also ships learned detectors:
+
+| Model | Target | Type |
+|---|---|:---:|
+| 📦 Custom trained | Cardboard box detection | ![Custom](https://img.shields.io/badge/-custom%20trained-success) |
+| 🍬 Custom trained | Candy detection | ![Custom](https://img.shields.io/badge/-custom%20trained-success) |
+| `yolo26n.pt` | General-purpose objects | ![Nano](https://img.shields.io/badge/-YOLO%20nano-informational) |
+| `yolo11n.pt` | General-purpose objects | ![Nano](https://img.shields.io/badge/-YOLO%20nano-informational) |
+
+---
+
+## 📐 Camera Calibration
+
+Calibration runs in **two independent stages** — first fix the *camera*, then fix the *world*.
+
+```mermaid
+flowchart TB
+    subgraph S1["🔬 Stage 1 — Intrinsic"]
+        A1[♟️ 20 Chessboard Images] --> A2[Camera Matrix]
+        A1 --> A3[Distortion Coefficients]
+        A2 --> A4[✅ Reprojection Error<br/>0.6863 px]
+        A3 --> A4
+    end
+    subgraph S2["🌍 Stage 2 — Extrinsic"]
+        B1[📏 Fixed Mount @ 41 cm] --> B2[Known World Points]
+        B2 --> B3[3×3 Homography Matrix]
+        B3 --> B4[✅ Pixel → mm Mapping]
+    end
+    S1 --> S2
+
+    style A4 fill:#2ca02c,stroke:#fff,color:#fff
+    style B4 fill:#2ca02c,stroke:#fff,color:#fff
+```
+
+### ♟️ Stage 1 — Chessboard Calibration *(Intrinsic)*
+
+Standard OpenCV chessboard calibration recovers two matrices:
+
+<table>
+<tr>
+<td width="50%">
+
+**🔭 Camera Matrix**
+
+Describes the camera's *own* optical properties:
+- Focal lengths `fx`, `fy`
+- Principal point `cx`, `cy`
+
+</td>
+<td width="50%">
+
+**🌀 Distortion Coefficients**
+
+Model and cancel lens distortion:
+- Radial (barrel / pincushion)
+- Tangential (sensor misalignment)
+
+</td>
+</tr>
+</table>
+
+**Method** — 20 chessboard images captured at varying angles, orientations, and positions across the frame.
+
+<!-- Rendered as a green "Tip" callout on GitHub -->
+> [!TIP]
+> **Result: mean reprojection error = `0.6863 px`** — comfortably sub-pixel, which is a healthy calibration for a 20-image set.
+
+### 🗺️ Stage 2 — Homographic Calibration *(Pixel → World)*
+
+With the camera **rigidly mounted at a fixed height**, a single `3×3` homography maps undistorted pixel coordinates to real-world planar coordinates in the arm's base frame.
+
+Because the pose is fixed and every target lies on one plane (the table surface), **no per-frame depth estimation is required** — one matrix does the whole job.
+
+```
+┌─────────────────────────────────────────┐
+│   📷  Camera                            │
+│    │                                    │
+│    │  ↕  Fixed height = 41 cm           │
+│    │                                    │
+│  ══╧══════════════════════════════════  │  ← Work surface (Z = 0)
+│      🎯 Targets live on this plane      │
+└─────────────────────────────────────────┘
+```
+
+<!-- Rendered as a red "Warning" callout on GitHub -->
+> [!WARNING]
+> The homography is valid **only** for this exact mounting height and pose. Move or re-aim the camera and the homographic calibration **must be redone** — the intrinsic calibration, however, stays valid.
+
+---
+
+<div align="center">
+
+**📷 Pixels in → 🦾 Motion out**
+
+</div>
 
 ---
 
