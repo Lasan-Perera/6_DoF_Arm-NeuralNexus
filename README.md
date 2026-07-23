@@ -51,6 +51,19 @@ CAD (SolidWorks)  →  Simscape Multibody twin  →  Inverse Kinematics solver
 
 ---
 
+### 🎥 Demos
+<img width="1000" height="809" alt="image" src="https://github.com/user-attachments/assets/b53d6c8d-e5b7-4205-8ab7-59c2d4a8a91d" />
+
+ 
+[![Pick and Place](https://img.shields.io/badge/▶_Pick_&_Place-4285F4?style=flat-square&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1faK7I7ZX_agUlC0IrAXy0S09C4y3s5h2/view?usp=sharing)
+[![Demo 1](https://img.shields.io/badge/▶_Demo_1-4285F4?style=flat-square&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1S6juB1wD2G7o0wvhlD4bZA8bZekDnkWw/view?usp=drive_link)
+[![Demo 2](https://img.shields.io/badge/▶_Demo_2-4285F4?style=flat-square&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1cnsTrxQivk0x1Dtu1PmsmbPZ_AezZNNF/view?usp=sharing)
+[![MATLAB](https://img.shields.io/badge/▶_MATLAB_Sims-0076A8?style=flat-square&logo=mathworks&logoColor=white)](https://drive.google.com/file/d/1yWmGitRZMLtR4NfW3XfLVypYUs1kBSMH/view?usp=drive_link)
+[![Progress](https://img.shields.io/badge/▶_Full_Progress-34A853?style=flat-square&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1Re87R6V8fl_Va-D2lkvHRHDZWcIKDiEP/view?usp=drive_link)
+ 
+---
+
+
 ## 1. 🔧 Motor Selection
 
 Motor choice was driven by one principle: **torque scales with how much arm you're carrying.** The base carries everything; the wrist carries almost nothing. So the arm uses a *tiered* motor strategy rather than six identical motors.
