@@ -678,28 +678,6 @@ gantt
 
 ---
 
-## 💡 Engineering Lessons
-
-> **1. "Slower made it worse" is a diagnosis, not a dead end.**
-> Signal-integrity problems always improve with a slower clock. When ours degraded, that ruled out an entire hypothesis class and pointed at software. The wandering encoder was error codes contaminating an average — nothing analogue at all.
-
-> **2. Measure your constants. Never assume them.**
-> J6 was assumed to be 1600 pulses/rev from microstepping specs. A single 30° test measured **3200**. Every derived value downstream had been quietly wrong.
-
-> **3. Timing constants and tick rates are one atomic change.**
-> Retuning the ISR from 50 kHz to 2 kHz without updating `dt` and `stepInterval` made every motor crawl at 1/25 speed. The bug looked mechanical; it was two hardcoded numbers.
-
-> **4. Handle direction exactly once.**
-> `jointDir` and `encStepSign` each encode direction correctly. Applying both cancels or doubles the sign depending on which side of the target you start from — producing a bug that appears to work half the time.
-
-> **5. The physics sets the schedule.**
-> A 60° move takes 4 seconds. Commanding one every 1 second means every move gets interrupted at 25%. No amount of amplitude tuning fixes a timing problem.
-
-> **6. Mechanical decisions constrain software permanently.**
-> Where an encoder magnet is mounted determines whether absolute positioning is *mathematically possible*. No firmware can recover information the mechanics threw away.
-
----
-
 <div align="center">
 
 ### 📂 Repositories
@@ -708,11 +686,6 @@ gantt
 [![Simulation Repo](https://img.shields.io/badge/Simulation-6__DoF__Arm--NeuralNexus-181717?style=for-the-badge&logo=github)](https://github.com/Lasan-Perera)
 
 ---
-
-**Built with curiosity, debugged with stubbornness.** 🦾
-
-*Every bug in this README was found the hard way so it doesn't have to be found twice.*
-
 </div>
 
 # 👁️ Computer Vision & Object Detection
