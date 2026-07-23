@@ -707,19 +707,19 @@ flowchart LR
 
 ---
 
-## 🎨 Object Detection
+## Object Detection
 
-### 🥇 Primary — OpenCV Colour Identification
+### Primary — OpenCV Colour Identification
 
 The main detection path uses **classical colour segmentation** (HSV thresholding → contour extraction → centroid).
 
 Why classical over learned, as the default?
 
-| ⚡ Latency | 🎯 Determinism | 💻 Compute | 🔧 Tunability |
+| Latency | Determinism | Compute | Tunability |
 |:---:|:---:|:---:|:---:|
 | Millisecond-scale | Same input → same output, every time | Runs comfortably on CPU | Live HSV slider tuning |
 
-### 🧠 Secondary — Trained Detectors
+### Secondary — Trained Detectors
 
 For objects that colour alone cannot separate, the repository also ships learned detectors:
 
@@ -732,7 +732,7 @@ For objects that colour alone cannot separate, the repository also ships learned
 
 ---
 
-## 📐 Camera Calibration
+## Camera Calibration
 
 Calibration runs in **two independent stages** — first fix the *camera*, then fix the *world*.
 
@@ -772,7 +772,7 @@ Describes the camera's *own* optical properties:
 </td>
 <td width="50%">
 
-**🌀 Distortion Coefficients**
+** Distortion Coefficients**
 
 Model and cancel lens distortion:
 - Radial (barrel / pincushion)
@@ -788,7 +788,7 @@ Model and cancel lens distortion:
 > [!TIP]
 > **Result: mean reprojection error = `0.6863 px`** — comfortably sub-pixel, which is a healthy calibration for a 20-image set.
 
-### 🗺️ Stage 2 — Homographic Calibration *(Pixel → World)*
+### Stage 2 — Homographic Calibration *(Pixel → World)*
 
 With the camera **rigidly mounted at a fixed height**, a single `3×3` homography maps undistorted pixel coordinates to real-world planar coordinates in the arm's base frame.
 
