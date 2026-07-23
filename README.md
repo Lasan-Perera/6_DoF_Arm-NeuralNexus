@@ -667,26 +667,7 @@ gantt
     Encoder remount J1-J3     :9, 10
     Vision pick-and-place     :10, 11
 ```
-
-**Next milestones**
-
-1. **Re-derive `pulsesPerJointRev` per joint** using the `TEST` routine — J6 already measured at 3200 rather than the assumed 1600, so the others are suspect. *Measure, don't assume.*
-2. **Absolute positioning for J4/J5/J6** — seed `motors[].position` from the encoder at boot; commands become true "go to angle".
-3. **Closed-loop step correction** — use live encoder feedback to detect and correct missed steps during motion.
-4. **Encoder remount (J1/J2/J3)** — relocate magnets past the final reduction to make all six joints absolute.
-5. **Vision pipeline** — camera + detection feeding target XYZ into the existing IK solver.
-
 ---
-
-<div align="center">
-
-### 📂 Repositories
-
-[![Firmware Repo](https://img.shields.io/badge/Firmware-NeuralNexusArm__CodeBase-181717?style=for-the-badge&logo=github)](https://github.com/Lasan-Perera/NeuralNexusArm_CodeBase)
-[![Simulation Repo](https://img.shields.io/badge/Simulation-6__DoF__Arm--NeuralNexus-181717?style=for-the-badge&logo=github)](https://github.com/Lasan-Perera)
-
----
-</div>
 
 # 👁️ Computer Vision & Object Detection
 
@@ -828,15 +809,18 @@ Because the pose is fixed and every target lies on one plane (the table surface)
 > [!WARNING]
 > The homography is valid **only** for this exact mounting height and pose. Move or re-aim the camera and the homographic calibration **must be redone** — the intrinsic calibration, however, stays valid.
 
+
 ---
 
 <div align="center">
 
-**📷 Pixels in → 🦾 Motion out**
+### 📂 Repositories
 
-</div>
+[![Firmware Repo](https://img.shields.io/badge/Firmware-NeuralNexusArm__CodeBase-181717?style=for-the-badge&logo=github)](https://github.com/Lasan-Perera/NeuralNexusArm_CodeBase)
+[![Simulation Repo](https://img.shields.io/badge/Simulation-6__DoF__Arm--NeuralNexus-181717?style=for-the-badge&logo=github)](https://github.com/Lasan-Perera)
 
 ---
+</div>
 
 ## Author
 
