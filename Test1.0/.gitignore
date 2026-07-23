@@ -1,0 +1,31 @@
+# ---- Build output ----
+Debug/
+Release/
+*.o
+*.d
+*.su
+*.elf
+*.bin
+*.hex
+*.map
+*.list
+*.cyclo
+
+# ---- STM32CubeIDE / Eclipse workspace cruft ----
+.metadata/
+RemoteSystemsTempFiles/
+*.launch.bak
+
+# ---- STM32CubeMX ----
+# (keep the .ioc - it's your CubeMX config source of truth)
+~$*
+*.bak
+
+# ---- OS files ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Editor temp ----
+*.swp
+*~

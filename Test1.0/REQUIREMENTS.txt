@@ -1,0 +1,87 @@
+==============================================================================
+ NeuralNexusArm - Firmware Requirements & Build Environment
+==============================================================================
+ 6-DOF robotic arm firmware for STM32H743 (WeAct MiniSTM32H743 core board).
+ This file documents the toolchain, hardware, and configuration needed to
+ build, flash, and run the firmware in this repository.
+==============================================================================
+
+------------------------------------------------------------------------------
+ TOOLCHAIN
+------------------------------------------------------------------------------
+STM32CubeIDE            (project built/flashed from CubeIDE; HAL/C)
+STM32CubeMX             (configuration via the .ioc file; regenerates code)
+GNU Arm Embedded (arm-none-eabi-gcc)   - bundled with STM32CubeIDE
+ST-Link                 (for flashing / debugging over SWD)
+
+Note: the exact CubeIDE / HAL firmware-pack versions used are whatever is
+installed locally. Record your versions here for reproducibility:
+    STM32CubeIDE version : <fill in, e.g. 1.16.x>
+    STM32Cube FW_H7 pack : <fill in, e.g. 1.11.x>
+
+------------------------------------------------------------------------------
+ TARGET HARDWARE
+------------------------------------------------------------------------------
+MCU            : STM32H743VITx  (WeAct MiniSTM32H743 core board)
+Core clock     : 420 MHz  (25 MHz HSE -> PLL: M=5, N=168, P=2)
+USB            : USB CDC (Virtual COM Port), FS, clocked from HSI48
+Step timer     : TIM6 @ 50 kHz (Stepper_Update ISR tick)
+
+Stepper axes (joint -> motor -> driver):
+    J1  ->  M3  ->  DM542            (NEMA 23)
+    J2  ->  M1  ->  CL57T            (NEMA 24, closed-loop)
+    J3  ->  M2  ->  CL57T            (NEMA 24, closed-loop)
+    J4  ->  M5  ->  TMC2209 (1/8)    (NEMA 17)
+    J5  ->  M4  ->  TMC2209 (1/8)    (NEMA 17)
+    J6  ->  M6  ->  TMC2209 (1/8)    (NEMA 17)
+
+    jointToMotor[6] = { 2, 0, 1, 4, 3, 5 }   (logical J1-J6 -> motors[] index)
+
+Pulses per JOINT revolution (pulses/motor-rev x gear ratio):
+    J1=2800  J2=5000  J3=5000  J4=1600  J5=1600  J6=1600
+
+Wiring notes:
+    M1-M3 : common-anode. STEP+/DIR+/ENA+ tied to external +5V; STM32 sinks
+            on the minus terminals via open-drain GPIO.
+    M4-M6 : push-pull 3.3V direct (TMC2209 step/dir, MS1/MS2 floating = 1/8).
+
+------------------------------------------------------------------------------
+ CRITICAL STM32H743 USB CDC NOTES  (required for the COM port to enumerate)
+------------------------------------------------------------------------------
+1. Route HSI48 to the USB peripheral in SystemClock config / SysInit:
+       PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB;
+       PeriphClkInit.UsbClockSelection    = RCC_USBCLKSOURCE_HSI48;
+       HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
+2. Enable the USB voltage detector before MX_USB_DEVICE_Init():
+       HAL_PWREx_EnableUSBVoltageDetector();
+3. Use the board's native USB-C (PA11/PA12 = USB_OTG_FS DM/DP), NOT the
+   ST-Link USB, and a data-capable cable.
+
+------------------------------------------------------------------------------
+ SERIAL PROTOCOL (PC <-> STM32)
+------------------------------------------------------------------------------
+Port     : USB CDC Virtual COM (e.g. COM9), 115200 8N1
+Command  : six comma-separated joint angles in degrees, newline-terminated
+           e.g.   "81.09,10.45,132.75,0.00,147.88,-129.49\n"
+Reply    : "steps: <j1> <j2> <j3> <j4> <j5> <j6>\r\n"  (debug echo)
+Mode     : RELATIVE (each command re-zeros position and moves by the delta).
+           Absolute positioning + J3/J5 180-deg offsets are staged but
+           disabled until AS5047P encoder homing is added.
+
+------------------------------------------------------------------------------
+ PC-SIDE (simulation / IK)  -- separate repo: 6_DoF_Arm-NeuralNexus
+------------------------------------------------------------------------------
+MATLAB
+Robotics System Toolbox        (rigidBodyTree, inverseKinematics)
+Simscape / Simscape Multibody  (model import, Mechanics Explorer)
+Serial:  MATLAB serialport("COM9", 115200)
+
+------------------------------------------------------------------------------
+ BUILD & FLASH
+------------------------------------------------------------------------------
+1. Open the project in STM32CubeIDE (import existing project).
+2. (Optional) open the .ioc in CubeMX and regenerate if you change config.
+3. Build (hammer icon).
+4. Flash to the board via ST-Link (Run).
+5. Confirm the board enumerates as a COM port, then command it from MATLAB.
+==============================================================================
