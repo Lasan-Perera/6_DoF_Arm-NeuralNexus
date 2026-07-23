@@ -828,7 +828,7 @@ Because the pose is fixed and every target lies on one plane (the table surface)
 |:----------|:-----|:-------|
 | **230487D** | Lasan Perera | [@Lasan-Perera](https://github.com/Lasan-Perera) |
 | **230502X** | Deneth Priyadarshana | — |
-| **230492M** | Dulana Pitiwaduge | — |
+| **230492M** | Dulana Pitiwaduge | [@DulanaPiti](https://github.com/DulanaPiti) |
 | **230051L** | Isitha Dinujaya | — |
 | **230108U** | Mokshan Colombage | — |
  
