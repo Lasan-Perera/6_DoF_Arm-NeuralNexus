@@ -7,6 +7,7 @@
 [![Firmware](https://img.shields.io/badge/Firmware-STM32H743VITx-03234B?style=for-the-badge&logo=stmicroelectronics&logoColor=white)](#)
 [![Language](https://img.shields.io/badge/Language-C%20(HAL)-A8B9CC?style=for-the-badge&logo=c&logoColor=black)](#)
 [![Simulation](https://img.shields.io/badge/Simulation-MATLAB%20%2F%20Simscape-0076A8?style=for-the-badge&logo=mathworks&logoColor=white)](#)
+[![PCB](https://img.shields.io/badge/PCB-Altium%20Designer-A5915F?style=for-the-badge&logo=altiumdesigner&logoColor=white)](#)
 [![CAD](https://img.shields.io/badge/CAD-SolidWorks-D42B22?style=for-the-badge&logo=dassaultsystemes&logoColor=white)](#)
 [![UI](https://img.shields.io/badge/UI-Web%20Serial%20API-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](#)
 
